@@ -1,0 +1,8 @@
+/TestTechniqueDotnet/bin/
+/TestTechniqueDotnet/obj/
+.idea/
+.vscode/
+gen/
+.DS_Store
+/.vs
+/TestTechniqueDotnet/Migrations
