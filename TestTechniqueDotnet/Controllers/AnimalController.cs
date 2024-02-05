@@ -8,12 +8,12 @@ namespace TestTechniqueDotnet.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class ClientController : Controller
+public class AnimalController : Controller
 {
     private readonly PetStoreContext _petStoreContext;
-    private readonly ILogger<ClientController> _logger;
+    private readonly ILogger<AnimalController> _logger;
 
-    public ClientController(PetStoreContext petStoreContext, ILogger<ClientController> logger)
+    public AnimalController(PetStoreContext petStoreContext, ILogger<AnimalController> logger)
     {
         _petStoreContext = petStoreContext;
         _logger = logger;
@@ -24,24 +24,27 @@ public class ClientController : Controller
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public ActionResult<Client> Get(Guid id)
     {
-        var client = _petStoreContext.Clients.FirstOrDefault(x => x.Id == id);
+        var animal = _petStoreContext.Animals
+            .Include(x => x.Transaction)
+            .Include(x => x.Master)
+            .FirstOrDefault(x => x.Id == id);
 
-        if (client is null)
+        if (animal is null)
         {
-            _logger.LogInformation("No client for id : {id}", id);
+            _logger.LogInformation("No animal for id : {id}", id);
             return NotFound();
         }
         
-        return Ok(client);
+        return Ok(animal);
     }
     
     [HttpGet()]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public ActionResult<IEnumerable<Client>> Get()
+    public ActionResult<IEnumerable<Animal>> Get()
     {
-        var res = _petStoreContext.Clients
-            .Include(x => x.Transactions)
-            .Include(x => x.Animals);
+        var res = _petStoreContext.Animals
+            .Include(x => x.Transaction)
+            .Include(x => x.Master);
         return Ok(res);
     }
     
@@ -49,15 +52,15 @@ public class ClientController : Controller
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public IActionResult Post([FromBody] ClientDTO clientDto)
+    public IActionResult Post([FromBody] AnimalDTO animalDto)
     {
         if (!ModelState.IsValid)
             return BadRequest();
         
-        var client = clientDto.ToClient();
-        _petStoreContext.Clients.Add(client);
+        var animal = animalDto.ToAnimal();
+        _petStoreContext.Animals.Add(animal);
         _petStoreContext.SaveChanges();
-        return CreatedAtAction(nameof(Post), new { id = client.Id }, client);
+        return CreatedAtAction(nameof(Post), new { id = animal.Id }, animal);
     }
     
     [HttpPut("{id:guid}")]
@@ -65,21 +68,21 @@ public class ClientController : Controller
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public IActionResult Put(Guid id, [FromBody] ClientDTO clientDto)
+    public IActionResult Put(Guid id, [FromBody] AnimalDTO animalDto)
     {
         if (!ModelState.IsValid)
             return BadRequest();
 
-        var existingClient = _petStoreContext.Clients.FirstOrDefault(x => x.Id == id);
-        if (existingClient is null)
+        var existingAnimal = _petStoreContext.Animals.FirstOrDefault(x => x.Id == id);
+        if (existingAnimal is null)
         {
-            _logger.LogInformation("No client for id : {id}", id);
+            _logger.LogInformation("No animal for id : {id}", id);
             return NotFound();
         }
 
-        existingClient.FirstName = clientDto.FirstName;
-        existingClient.LastName = clientDto.LastName;
-        _petStoreContext.Clients.Update(existingClient);
+        existingAnimal.Name = animalDto.Name;
+        existingAnimal.BirthDate = animalDto.BirthDate;
+        _petStoreContext.Animals.Update(existingAnimal);
         _petStoreContext.SaveChanges();
         return NoContent();
     }
@@ -94,14 +97,14 @@ public class ClientController : Controller
         if (!ModelState.IsValid)
             return BadRequest();
 
-        var existingClient = _petStoreContext.Clients.FirstOrDefault(x => x.Id == id);
-        if (existingClient is null)
+        var existingAnimal = _petStoreContext.Animals.FirstOrDefault(x => x.Id == id);
+        if (existingAnimal is null)
         {
-            _logger.LogInformation("No client for id : {id}", id);
+            _logger.LogInformation("No animal for id : {id}", id);
             return NotFound();
         }
         
-        _petStoreContext.Clients.Remove(existingClient);
+        _petStoreContext.Animals.Remove(existingAnimal);
         _petStoreContext.SaveChanges();
         return NoContent();
     }

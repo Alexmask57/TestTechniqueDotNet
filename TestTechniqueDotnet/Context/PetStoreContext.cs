@@ -20,17 +20,19 @@ public class PetStoreContext : DbContext
         modelBuilder.Entity<Client>(b =>
         {
             b.HasMany(e => e.Transactions)
-                .WithOne(x => x.Client)
+                .WithOne()
                 .HasForeignKey(x => x.ClientId)
                 .IsRequired();
             b.HasMany(c => c.Animals)
-                .WithOne(x => x.Master);
+                .WithOne(x => x.Master)
+                .HasForeignKey(x => x.MasterId);
         });
         
         modelBuilder.Entity<Animal>(b =>
         {   
-            b.HasOne(e => e.Transaction)
-                .WithOne(x => x.Animal)
+            b.HasOne(x => x.Transaction)
+                .WithOne()
+                .HasForeignKey<Transaction>(x => x.AnimalId)
                 .IsRequired();
         });
     }
