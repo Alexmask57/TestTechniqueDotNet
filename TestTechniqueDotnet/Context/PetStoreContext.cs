@@ -9,9 +9,9 @@ public class PetStoreContext : DbContext
     {
     }
 
-    public DbSet<Client>? Clients { get; set; }
-    public DbSet<Animal>? Animals { get; set; }
-    public DbSet<Transaction>? Transactions { get; set; }
+    public virtual DbSet<Client> Clients { get; set; }
+    public virtual DbSet<Animal> Animals { get; set; }
+    public virtual DbSet<Transaction> Transactions { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
