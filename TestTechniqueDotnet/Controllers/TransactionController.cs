@@ -82,6 +82,47 @@ public class TransactionController : Controller
         return CreatedAtAction(nameof(Post), new { id = transaction.Id }, transaction);
     }
     
+    [HttpPut("{id:guid}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public IActionResult Put(Guid id, [FromBody] TransactionDTO transactionDto)
+    {
+        if (!ModelState.IsValid)
+            return BadRequest();
+
+        var existingTransaction = _petStoreContext.Transactions.FirstOrDefault(x => x.Id == id);
+        if (existingTransaction is null)
+        {
+            _logger.LogInformation("No transaction for id : {id}", id);
+            return NotFound($"No transaction for id : {id}");
+        }
+        
+        var existingClient = _petStoreContext.Clients.FirstOrDefault(x => x.Id == transactionDto.ClientId);
+        if (existingClient is null)
+        {
+            _logger.LogInformation("No client for id : {id}", transactionDto.ClientId);
+            return NotFound($"No client for id : {transactionDto.ClientId}");
+        }
+        
+        var existingAnimal = _petStoreContext.Animals.FirstOrDefault(x => x.Id == transactionDto.AnimalId);
+        if (existingAnimal is null)
+        {
+            _logger.LogInformation("No animal for id : {id}", transactionDto.AnimalId);
+            return NotFound($"No animal for id : {transactionDto.AnimalId}");
+        }
+        
+        existingTransaction.Price = transactionDto.Price;
+        existingTransaction.ClientId = transactionDto.ClientId;
+        existingTransaction.AnimalId = transactionDto.AnimalId;
+        existingAnimal.Transaction = existingTransaction;
+        _petStoreContext.Transactions.Update(existingTransaction);
+        _petStoreContext.Animals.Update(existingAnimal);
+        _petStoreContext.SaveChanges();
+        return NoContent();
+    }
+    
     [HttpDelete("{id:guid}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]

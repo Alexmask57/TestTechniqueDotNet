@@ -26,7 +26,7 @@ public class AnimalController : Controller
     {
         var animal = _petStoreContext.Animals
             .Include(x => x.Transaction)
-            .Include(x => x.Master)
+            // .Include(x => x.Master)
             .FirstOrDefault(x => x.Id == id);
 
         if (animal is null)
@@ -44,7 +44,8 @@ public class AnimalController : Controller
     {
         var res = _petStoreContext.Animals
             .Include(x => x.Transaction)
-            .Include(x => x.Master);
+            // .Include(x => x.Master)
+            .ToList();
         return Ok(res);
     }
     

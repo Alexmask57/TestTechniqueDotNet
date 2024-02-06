@@ -41,7 +41,7 @@ public class ClientController : Controller
     {
         var res = _petStoreContext.Clients
             .Include(x => x.Transactions)
-            .Include(x => x.Animals);
+            .Include(x => x.Animals).ToList();
         return Ok(res);
     }
     
